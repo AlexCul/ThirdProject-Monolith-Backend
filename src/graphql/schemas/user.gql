@@ -1,0 +1,70 @@
+type User {
+    fullName: String!
+    nickname: String!
+    email: String
+    id: ID!
+    avatar: ID
+    posts: [Post!]!
+    description: String
+    website: String
+}
+
+type Notification {
+    title: String!
+    message: String!
+}
+
+type AuthPayload {
+    status: Int!
+    token: String
+}
+
+type Query {
+    users: [User!]!
+    user(id: ID!): User
+    posts(userId: ID!): [Post!]!
+}
+
+type Mutation {
+    createUser(
+        fullName: String!,
+        email: String,
+        nickname: String!,
+        password: String!
+    ): AuthPayload
+    deleteUser(token: String!): Boolean!
+    updateUser(
+        token: String!,
+        fullName: String,
+        email: String,
+        nickname: String,
+        password: String,
+        avatar: ID,
+        description: String,
+        website: String
+    ): Boolean!
+    login(
+        nickname: String,
+        email: String,
+        password: String!
+    ): AuthPayload
+
+    createPost(
+        token: String!,
+        title: String!,
+        media: [ID!]!,
+        description: String
+    ): Post
+    deletePost(token: String!, postId: ID!): Boolean!
+    updatePost(
+        token: String!,
+        postId: ID!,
+        title: String,
+        description: String,
+        media: [ID!]!
+    ): Boolean!
+}
+
+type Subscription {
+    newNotification(userId: ID!): Notification!
+}

@@ -1,0 +1,39 @@
+type Post {
+    title: String!
+    media: [ID!]!
+    description: String
+    comments: [Comment!]!
+    likes: [Like!]!
+    id: ID!
+    tags: [String!]!
+}
+
+type Comment {
+    writtenBy: User!
+    content: String!
+    likes: [Like!]!
+    replies: [Reply!]!
+}
+
+type Reply {
+    writtenBy: User!
+    content: String!
+    likes: [Like!]!
+}
+
+type Like {
+    likedBy: User!
+}
+
+type Query {
+    post(id: ID!): Post
+
+    randomPosts(count: Int!): [Post!]!
+
+    likesCount(id: ID!): Int
+    commentsCount(id: ID!): Int
+}
+
+type Subscription {
+    postsByTags(tags: [String!]!): Post!
+}
