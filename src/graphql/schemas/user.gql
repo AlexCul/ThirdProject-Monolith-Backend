@@ -7,6 +7,8 @@ type User {
     posts: [Post!]!
     description: String
     website: String
+    followers: [ID!]!
+    following: [ID!]!
 }
 
 type Notification {
@@ -22,7 +24,12 @@ type AuthPayload {
 type Query {
     users: [User!]!
     user(id: ID!): User
+    userByNickname(nickname: String!): User
+    userByToken(token: String!): User
     posts(userId: ID!): [Post!]!
+    postsCount(userId: ID!): Int
+    followersCount(userId: ID!): Int
+    followingCount(userId: ID!): Int
 }
 
 type Mutation {

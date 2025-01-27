@@ -11,6 +11,8 @@ interface IUser {
     avatar?: string | undefined;
     description?: string | undefined;
     website?: string | undefined;
+    followers: Types.ObjectId[];
+    following: Types.ObjectId[];
 }
 
 const userSchema = new Schema<IUser>({
@@ -48,7 +50,19 @@ const userSchema = new Schema<IUser>({
     website: {
         type: String,
         required: false,
-    }
+    },
+    followers: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        },
+    ],
+    following: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "user",
+        },
+    ],
 });
 
 const User = model("user", userSchema);

@@ -1,0 +1,13 @@
+type Media {
+    bucketName: String!
+    objectName: String!
+}
+
+type Query {
+    media(bucketName: String!, objectName: String!): String
+}
+
+type Mutation {
+    createMedia(base64: String!): Media
+    deleteMedia(bucketName: String!, objectName: String!): Boolean!
+}

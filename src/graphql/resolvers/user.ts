@@ -45,14 +45,73 @@ const userResolver: IResolvers = {
                 );
             }
         },
-        posts: async (_: any, { id }: { id: string }) => {
+        userByNickname: async (_: any, {
+            nickname,
+        }: { nickname: string }) => {
             try {
-                const user = await User.findById(id);
-                if (!user) throw new Error("User is not found");
-                return user.posts;
+                return await User.findOne({ nickname });
+            } catch (error) {
+                throw new Error(
+                    `Find user by nickname error: ${(error as Error).message}`,
+                );
+            }
+        },
+        userByToken: async (_: any, { token }: { token: string }) => {
+            try {
+                const verifiedToken = verifyToken(token);
+                if (verifiedToken === null) return null;
+                return await User.findById(verifiedToken.userId);
+            } catch (error) {
+                throw new Error(
+                    `User with token ${token} not found: ${(error as Error).message}`,
+                );
+            }
+        },
+        posts: async (_: any, { userId }: { userId: string }) => {
+            try {
+                const user = await User.findById(userId);
+                if (!user) throw new Error("User not found");
+
+                return user!.posts;
             } catch (error) {
                 throw new Error(
                     `Posts loading error: ${(error as Error).message}`,
+                );
+            }
+        },
+        postsCount: async (_: any, { userId }: { userId: string }) => {
+            try {
+                const user = await User.findById(userId);
+                if (!user) throw new Error("User not found");
+
+                return user.posts.length;
+            } catch (error) {
+                throw new Error(
+                    `Post with id ${userId} not found: ${(error as Error).message}`,
+                );
+            }
+        },
+        followersCount: async (_: any, { userId }: { userId: string }) => {
+            try {
+                const user = await User.findById(userId);
+                if (!user) throw new Error("User not found");
+
+                return user.followers.length;
+            } catch (error) {
+                throw new Error(
+                    `Followers count error: ${(error as Error).message}`,
+                );
+            }
+        },
+        followingCount: async (_: any, { userId }: { userId: string }) => {
+            try {
+                const user = await User.findById(userId);
+                if (!user) throw new Error("User not found");
+
+                return user.following.length;
+            } catch (error) {
+                throw new Error(
+                    `Following count error: ${(error as Error).message}`,
                 );
             }
         },

@@ -2,12 +2,15 @@ import express from "express";
 // Заметка: с ES6 импортом, оно не работает
 const { ruruHTML } = require('ruru/server');
 
+import cors from "cors";
+
 import fullHandler from "./graphql/handler";
 
 import initDb from "./db/init";
 initDb();
 
 const app = express();
+app.use(cors());
 
 app.all('/graphql', fullHandler);
 
