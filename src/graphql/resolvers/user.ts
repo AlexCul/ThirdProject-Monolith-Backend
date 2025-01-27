@@ -242,10 +242,21 @@ const userResolver: IResolvers = {
             media, description,
         }) => {
             try {
+                const userId = await verifyToken(token)!.userId;
+                if (userId === null) throw new Error("User not found");
+                
+                const updatedMedia = media.map((element: string) => {
+                    return {
+                        base64: element,
+                    };
+                });
+
+                console.log(media);
                 const post = new Post({
                     title: title,
-                    media: media,
+                    media: updatedMedia,
                     description: description,
+                    user: userId,
                 });
                 await post.save();
 
@@ -312,6 +323,33 @@ const userResolver: IResolvers = {
             // переведётся в true
             // - если это null, то переведётся в false
             return !!updatedPost;
+        },
+        follow: async (_: any, {
+            token, toUser,
+        }: {
+            token: string,
+            toUser: string,
+        }) => {
+            try {
+                const verifiedToken = verifyToken(token);
+                if (verifiedToken === null) return false;
+
+                const foundFromUser = await User.findById(verifiedToken.userId);
+                if (foundFromUser === null) return false;
+
+                const foundToUser = await User.findById(toUser);
+                if (foundToUser === null) return false;
+
+                foundFromUser.following.push(foundToUser._id);
+                await foundFromUser.save();
+
+                foundToUser.followers.push(foundFromUser._id);
+                await foundToUser.save();
+
+                return true;
+            } catch (error) {
+                return false;
+            }
         },
     },
 

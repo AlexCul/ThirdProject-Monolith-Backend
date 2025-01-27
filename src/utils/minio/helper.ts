@@ -25,10 +25,6 @@ export const createMinIOClient = ({
     });
 };
 
-export const generateUniqueBucketName = () => {
-    return `bucket-${crypto.randomUUID()}`;
-};
-
 export const createBucket = async (
     client: Client, bucketName: string,
 ) => {
@@ -41,26 +37,28 @@ export const createBucket = async (
 };
 
 export const uploadBase64Media = async (
-    client: Client, bucketName: string,
+    client: Client,
     base64Media: string, objectName?: string,
 ) => {
+    await createBucket(client, "media");
+
     const buffer = Buffer.from(base64Media, "base64");
     const uniqueObjectName = objectName || `media-${crypto.randomUUID()}`;
-    await client.putObject(bucketName, uniqueObjectName, buffer);
+    await client.putObject("media", uniqueObjectName, buffer);
 
     return uniqueObjectName;
 };
 
-export const uploadMediaToNewBucket = async (
-    client: Client, base64Media: string,
-) => {
-    const bucketName = generateUniqueBucketName();
-    await createBucket(client, bucketName);
-
-    const objectName = await uploadBase64Media(
-        client, bucketName, base64Media,
-    );
-
-    return { bucketName, objectName };
+export const getMedia = async (client: Client, objectName: string) => {
+    const stream = await client.getObject("media", objectName);
+    const chunks: Buffer[] = [];
+    
+    return new Promise((resolve, reject) => {
+        stream.on("data", (chunk: Buffer) => chunks.push(chunk));
+        stream.on("end", () => {
+            const result = Buffer.concat(chunks).toString("utf-8");
+            resolve(result);
+        });
+        stream.on("error", (error) => reject(error));
+    });
 };
-

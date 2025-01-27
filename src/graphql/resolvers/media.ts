@@ -9,7 +9,7 @@
 // но упомяну, что можно настроить TypeScript на 
 // абсолютные пути (это просто я дурак, что не смог)
 import {
-    createMinIOClient, uploadMediaToNewBucket,
+    createMinIOClient, uploadBase64Media
 } from "../../utils/minio/helper";
 
 const client = createMinIOClient({});
@@ -17,13 +17,13 @@ const client = createMinIOClient({});
 const mediaResolver = {
     Query: {
         media: async (_: any, {
-            bucketName, objectName,
+            objectName,
         }: {
-            bucketName: string, objectName: string,
+            objectName: string,
         }) => {
             try {
                 const stream = await client.getObject(
-                    bucketName, objectName,
+                    "media", objectName,
                 );
                 const chunks: Buffer[] = [];
 
@@ -35,7 +35,7 @@ const mediaResolver = {
                             .toString("base64");
                         resolve(`data:image/png;base64,${base64}`);
                     });
-                    stream.on("error", (err) => reject(err));
+                    stream.on("error", (error) => reject(error));
                 });
             } catch (error) {
                 throw new Error(
@@ -50,11 +50,11 @@ const mediaResolver = {
             base64,
         }: { base64: string }) => {
             try {
-                const result = await uploadMediaToNewBucket(
+                const result = await uploadBase64Media(
                     client, base64,
                 );
 
-                return result;
+                return base64;
             } catch (error) {
                 throw new Error(
                     `Creating image error: ${(error as Error).message}`,
@@ -62,13 +62,12 @@ const mediaResolver = {
             }
         },
         deleteMedia: async (_: any, {
-            bucketName, objectName
+            objectName
         }: {
-            bucketName: string,
             objectName: string,
         }) => {
             try {
-                await client.removeObject(bucketName, objectName);
+                await client.removeObject("media", objectName);
                 
                 return true;
             } catch (error) {

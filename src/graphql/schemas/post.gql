@@ -1,6 +1,6 @@
 type Post {
     title: String!
-    media: [ID!]!
+    media: [Media!]!
     description: String
     comments: [Comment!]!
     likes: [Like!]!
@@ -32,6 +32,8 @@ type Query {
 
     likesCount(id: ID!): Int
     commentsCount(id: ID!): Int
+    firstMedia(id: ID!): Media
+    firstMediaForPosts(ids: [ID!]!): [Media!]!
 }
 
 type Subscription {

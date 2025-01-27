@@ -13,6 +13,9 @@ import { PubSub } from "graphql-subscriptions";
 // абсолютные пути (это просто я дурак, что не смог)
 import { Post } from "../../db/models/post";
 
+import { createMinIOClient, getMedia } from "../../utils/minio/helper";
+
+const client = createMinIOClient({});
 const pubSub = new PubSub();
 
 const postResolver: IResolvers = {
@@ -35,7 +38,11 @@ const postResolver: IResolvers = {
                     { $sample: { size: count } },
                 ]);
 
-                return posts;
+                return posts
+                    .map(post => ({
+                        ...post,
+                        id: post._id.toString(),
+                    }));
             } catch (error) {
                 throw new Error(
                     `Random posts loading error: ${(error as Error).message}`,
@@ -64,6 +71,52 @@ const postResolver: IResolvers = {
             } catch (error) {
                 throw new Error(
                     `Comments count loading error: ${(error as Error).message}`,
+                );
+            }
+        },
+        firstMedia: async (_: any, { id }: { id: string }) => {
+            try {
+                const foundPost = await Post.findById(id);
+                if (!foundPost) return null;
+
+                if (!foundPost.media[0]) return null;
+                return foundPost.media[0];
+            } catch (error) {
+                throw new Error(
+                    `First media loading error: ${(error as Error).message}`,
+                );
+            }
+        },
+        firstMediaForPosts: async (_: any, {
+            ids,
+        }: { ids: string[] }) => {
+            try {
+                let result = [];
+                for (let id of ids) {
+                    const foundPost = await Post.findById(id);
+                    if (!foundPost) {
+                        result.push({
+                            base64: null,
+                        });
+                        continue;
+                    }
+
+                    if (!foundPost.media[0]) {
+                        result.push({
+                            base64: null,
+                        });
+                        continue;
+                    }
+
+                    result.push(
+                        foundPost.media[0],
+                    );
+                }
+
+                return result;
+            } catch (error) {
+                throw new Error(
+                    `First media for posts loading error: ${(error as Error).message}`,
                 );
             }
         },

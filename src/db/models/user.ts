@@ -2,13 +2,15 @@ import {
     Schema, model, Types,
 } from "mongoose";
 
+import { mediaSchema, IMedia }from "./media";
+
 interface IUser {
     fullName: string;
     nickname: string;
     email?: string | undefined;
     passwordHash: string;
     posts: Types.ObjectId[];
-    avatar?: string | undefined;
+    avatar?: IMedia | undefined;
     description?: string | undefined;
     website?: string | undefined;
     followers: Types.ObjectId[];
@@ -40,7 +42,7 @@ const userSchema = new Schema<IUser>({
         },
     ],
     avatar: {
-        type: String,
+        type: mediaSchema,
         required: false,
     },
     description: {

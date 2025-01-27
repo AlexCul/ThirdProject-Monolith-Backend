@@ -2,9 +2,12 @@ import {
     Schema, model, Types,
 } from "mongoose";
 
+import { mediaSchema, IMedia } from "./media";
+
+
 interface IPost {
     title: string;
-    media: string[];
+    media: IMedia[];
     description?: string;
     comments: IComment[];
     likes: ILike[];
@@ -69,10 +72,7 @@ const postSchema = new Schema<IPost>({
         type: String,
         required: true,
     },
-    media: [{
-        type: String,
-        required: true,
-    }],
+    media: [mediaSchema],
     description: {
         type: String,
         required: false,

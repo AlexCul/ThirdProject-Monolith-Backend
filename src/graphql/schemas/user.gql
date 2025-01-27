@@ -3,7 +3,7 @@ type User {
     nickname: String!
     email: String
     id: ID!
-    avatar: ID
+    avatar: Media
     posts: [Post!]!
     description: String
     website: String
@@ -28,6 +28,8 @@ type Query {
     userByToken(token: String!): User
     posts(userId: ID!): [Post!]!
     postsCount(userId: ID!): Int
+    followers(userId: ID!): [ID!]!
+    following(userId: ID!): [ID!]!
     followersCount(userId: ID!): Int
     followingCount(userId: ID!): Int
 }
@@ -46,7 +48,7 @@ type Mutation {
         email: String,
         nickname: String,
         password: String,
-        avatar: ID,
+        avatar: String,
         description: String,
         website: String
     ): Boolean!
@@ -70,6 +72,7 @@ type Mutation {
         description: String,
         media: [ID!]!
     ): Boolean!
+    follow(token: String!, toUser: ID!): Boolean
 }
 
 type Subscription {
