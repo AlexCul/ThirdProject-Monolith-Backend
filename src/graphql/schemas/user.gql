@@ -71,6 +71,7 @@ type Mutation {
         description: String,
         media: [ID!]!
     ): Boolean!
+    unfollow(token: String!, fromUser: ID!): Boolean
     follow(token: String!, toUser: ID!): Boolean
     comment(token: String!, postId: ID!, text: String!): Boolean
     like(token: String!, postId: ID!): Boolean

@@ -365,6 +365,29 @@ const userResolver: IResolvers = {
                 return false;
             }
         },
+        unfollow: async (_: any, {
+            token, fromUser
+        }: {
+            token: string,
+            fromUser: string,
+        }) => {
+            const verifiedToken = verifyToken(token);
+            if (verifiedToken === null) return false;
+
+            const foundUser = await User.findById(verifiedToken.userId);
+            if (foundUser === null) return false;
+
+            const foundFromUser = await User.findById(fromUser);
+            if (foundFromUser === null) return false;
+
+            await User.updateOne(
+                { _id: fromUser },
+                { $pull: { followers: { _id: foundUser._id } } }
+            );
+
+            return true;
+
+        },
         comment: async (_: any, {
             token, postId, text,
         }: {
