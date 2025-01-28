@@ -123,6 +123,12 @@ const userResolver: IResolvers = {
             email, password,
         }): Promise<AuthPayload> => {
             try {
+                const doesUserExist = await User.findOne({ email });
+                if (doesUserExist) return {
+                    status: 403,
+                    token: "",
+                };
+
                 const user = new User({
                     fullName: fullName,
                     email: email,
