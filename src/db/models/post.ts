@@ -2,10 +2,13 @@ import {
     Schema, model, Types,
 } from "mongoose";
 
+import { IUser } from "./user";
+
 import { mediaSchema, IMedia } from "./media";
 
 
 interface IPost {
+    owner: Types.ObjectId;
     title: string;
     media: IMedia[];
     description?: string;
@@ -68,6 +71,11 @@ const commentSchema = new Schema<IComment>({
 });
 
 const postSchema = new Schema<IPost>({
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: "user",
+        required: true,
+    },
     title: {
         type: String,
         required: true,

@@ -253,6 +253,7 @@ const userResolver: IResolvers = {
 
                 console.log(media);
                 const post = new Post({
+                    owner: userId,
                     title: title,
                     media: updatedMedia,
                     description: description,
@@ -346,11 +347,86 @@ const userResolver: IResolvers = {
                 foundToUser.followers.push(foundFromUser._id);
                 await foundToUser.save();
 
+                pubSub.publish(`${foundToUser._id}-notifications`, {
+                    kind: "follow",
+                    fromUser: foundFromUser._id,
+                });
+
                 return true;
             } catch (error) {
                 return false;
             }
         },
+        comment: async (_: any, {
+            token, postId, text,
+        }: {
+            token: string,
+            postId: string,
+            text: string,
+        }) => {
+            try {
+                const verifiedToken = verifyToken(token);
+                if (verifiedToken === null) return false;
+
+                const foundUser = await User.findById(verifiedToken.userId);
+                if (foundUser === null) return false;
+
+                const foundPost = await Post.findById(postId);
+                if (foundPost === null) return false;
+
+                foundPost.comments.push({
+                    writtenBy: foundUser._id,
+                    content: text,
+                    likes: [],
+                    replies: [],
+                });
+                await foundPost.save();
+
+                pubSub.publish(`${foundPost.owner}-notifications`, {
+                    kind: "comment",
+                    postId: postId,
+                    fromUser: foundUser._id,
+                });
+
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+
+        like: async(_: any, {
+            token, postId,
+        }: {
+            token: string,
+            postId: string,
+        }) => {
+            try {
+                const verifiedToken = verifyToken(token);
+                if (verifiedToken === null) return false;
+
+                const foundUser = await User.findById(verifiedToken.userId);
+                if (foundUser === null) return false;
+
+                const foundPost = await Post.findById(postId);
+                if (foundPost === null) return false;
+
+                foundPost.likes.push({
+                    likedBy: foundUser._id,
+                });
+                await foundPost.save();
+
+                pubSub.publish(`${foundPost.owner}-notifications`, {
+                    kind: "like",
+                    postId: postId,
+                    fromUser: foundUser._id,
+                });
+
+                return true;
+            } catch (error) {
+                return false;
+            }
+        },
+
     },
 
     Subscription: {

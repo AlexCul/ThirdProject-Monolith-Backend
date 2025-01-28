@@ -73,6 +73,8 @@ type Mutation {
         media: [ID!]!
     ): Boolean!
     follow(token: String!, toUser: ID!): Boolean
+    comment(token: String!, postId: ID!, text: String!): Boolean
+    like(token: String!, postId: ID!): Boolean
 }
 
 type Subscription {
