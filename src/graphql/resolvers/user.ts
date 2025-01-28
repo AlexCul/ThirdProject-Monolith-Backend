@@ -261,7 +261,10 @@ const userResolver: IResolvers = {
                 });
                 await post.save();
 
-                return await post.toObject();
+                return {
+                    ...post.toObject(),
+                    id: post._id.toString(),
+                };
             } catch (error) {
                 throw new Error(
                     `User create error: ${(error as Error).message}`,
