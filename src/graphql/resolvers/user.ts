@@ -348,8 +348,7 @@ const userResolver: IResolvers = {
                 await foundToUser.save();
 
                 pubSub.publish(`${foundToUser._id}-notifications`, {
-                    kind: "follow",
-                    fromUser: foundFromUser._id,
+                    message: `${foundFromUser.nickname} started following you`,
                 });
 
                 return true;
@@ -383,9 +382,7 @@ const userResolver: IResolvers = {
                 await foundPost.save();
 
                 pubSub.publish(`${foundPost.owner}-notifications`, {
-                    kind: "comment",
-                    postId: postId,
-                    fromUser: foundUser._id,
+                    message: `${foundUser.nickname} commented on your post`,
                 });
 
                 return true;
@@ -416,9 +413,7 @@ const userResolver: IResolvers = {
                 await foundPost.save();
 
                 pubSub.publish(`${foundPost.owner}-notifications`, {
-                    kind: "like",
-                    postId: postId,
-                    fromUser: foundUser._id,
+                    message: `${foundUser.nickname} liked your post`,
                 });
 
                 return true;

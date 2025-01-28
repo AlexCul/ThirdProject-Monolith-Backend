@@ -12,7 +12,6 @@ type User {
 }
 
 type Notification {
-    title: String!
     message: String!
 }
 
