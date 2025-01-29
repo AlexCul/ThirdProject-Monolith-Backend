@@ -3,13 +3,14 @@ import {
 } from "mongoose";
 
 import { mediaSchema, IMedia }from "./media";
+import { postSchema, IPost } from "./post";
 
 interface IUser {
     fullName: string;
     nickname: string;
     email?: string | undefined;
     passwordHash: string;
-    posts: Types.ObjectId[];
+    posts: IPost[];
     avatar?: IMedia | undefined;
     description?: string | undefined;
     website?: string | undefined;
@@ -37,8 +38,8 @@ const userSchema = new Schema<IUser>({
     },
     posts: [
         {
-            type: Schema.Types.ObjectId,
-            ref: "post",
+            type: postSchema,
+            required: true,
         },
     ],
     avatar: {

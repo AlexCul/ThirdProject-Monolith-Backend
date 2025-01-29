@@ -103,4 +103,5 @@ const Post = model("post", postSchema);
 export {
     Post,
     postSchema,
+    IPost,
 };

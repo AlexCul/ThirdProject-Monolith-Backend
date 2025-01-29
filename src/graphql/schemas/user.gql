@@ -31,6 +31,7 @@ type Query {
     following(userId: ID!): [ID!]!
     followersCount(userId: ID!): Int
     followingCount(userId: ID!): Int
+    isFollower(token: String!, userId: ID!): Boolean
 }
 
 type Mutation {
@@ -60,7 +61,7 @@ type Mutation {
     createPost(
         token: String!,
         title: String!,
-        media: [ID!]!,
+        media: [String!]!,
         description: String
     ): Post
     deletePost(token: String!, postId: ID!): Boolean!

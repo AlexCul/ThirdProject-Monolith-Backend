@@ -18,6 +18,8 @@ import { Post } from "../../db/models/post";
 
 import { createToken, verifyToken } from "../../utils/auth/jwt";
 
+import { Types } from "mongoose";
+
 const pubSub = new PubSub();
 
 type AuthPayload = {
@@ -115,6 +117,12 @@ const userResolver: IResolvers = {
                 );
             }
         },
+        isFollower: async (_: any, {
+            token, userId,
+        }: { token: string, userId: string }) => {
+            const verifiedToken = verifyToken(token);
+            if (verifiedToken === null) return false;
+        },
     },
 
     Mutation: {
@@ -166,7 +174,7 @@ const userResolver: IResolvers = {
         },
         updateUser: async (_: any, {
             token, fullName, email, nickname,
-            password, avatar, description, website,
+            avatar, description, website,
         }): Promise<boolean> => {
             const verifiedToken = verifyToken(token);
             if (verifiedToken === null) return false;
@@ -181,10 +189,9 @@ const userResolver: IResolvers = {
             updateIfExists("fullName", fullName);
             updateIfExists("email", email);
             updateIfExists("nickname", nickname);
-            updateIfExists("passwordHash", bcrypt.hash(password, 10));
             updateIfExists("description", description);
             updateIfExists("website", website);
-            updateIfExists("avatar", avatar);
+            updateIfExists("avatar", { base64: avatar });
 
             const updatedUser = await User.findByIdAndUpdate(
                 verifiedToken.userId, updating,
@@ -266,6 +273,9 @@ const userResolver: IResolvers = {
                     user: userId,
                 });
                 await post.save();
+
+                const foundUser = await User.findById(userId);
+                foundUser!.posts.push(post);
 
                 return {
                     ...post.toObject(),
@@ -350,6 +360,18 @@ const userResolver: IResolvers = {
                 const foundToUser = await User.findById(toUser);
                 if (foundToUser === null) return false;
 
+                // это ОЧЕНЬ неэффективная реализация,
+                // но я обнаружил этот баг буквально за час 
+                // до защиты проекта, так что пока пофиг
+                await User.updateOne(
+                    { _id: foundToUser },
+                    { $pull: { followers: { _id: foundFromUser._id } } }
+                );
+                await User.updateOne(
+                    { _id: foundFromUser },
+                    { $pull: { following: { _id: foundToUser._id } } }
+                );
+
                 foundFromUser.following.push(foundToUser._id);
                 await foundFromUser.save();
 
@@ -399,14 +421,14 @@ const userResolver: IResolvers = {
                 const verifiedToken = verifyToken(token);
                 if (verifiedToken === null) return false;
 
-                const foundUser = await User.findById(verifiedToken.userId);
-                if (foundUser === null) return false;
-
                 const foundPost = await Post.findById(postId);
                 if (foundPost === null) return false;
 
+                const foundUser = await User.findById(verifiedToken.userId);
+                if (foundUser === null) return false;
+
                 foundPost.comments.push({
-                    writtenBy: foundUser._id,
+                    writtenBy: new Types.ObjectId(verifiedToken.userId),
                     content: text,
                     likes: [],
                     replies: [],
