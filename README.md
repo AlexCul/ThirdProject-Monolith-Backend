@@ -1,4 +1,4 @@
-для запуска из Dockerfile, выполните следующие команды:
+for running from the Dockerfile, execute the following commands:
 
 `docker run -d -p 9000:9000 -p 9001:9001 quay.io/minio/minio server /data --console-address ":9001"`
 
